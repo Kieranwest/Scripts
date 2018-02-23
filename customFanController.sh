@@ -14,18 +14,33 @@ temp=$(echo "$total/$cores" | bc)
 IDRACIP=""
 IDRACUSER=""
 IDRACPASSWORD=""
-STATICSPEED="0xA" #Convert decimal to base 16
-TEMPTHRESHOLD="50"
 
-if [[ $temp > $TEMPTHRESHOLD ]]
-   then
-    echo "$timestamp - Temperature is $temp" >> $logfile
-    echo "$timestamp - Enabling Dynamic Fan Control" >> $logfile
-    ipmitool -I lanplus -H $IDRACIP -U $IDRACUSER -P $IDRACPASSWORD raw 0x30 0x30 0x01 0x01
-   else
-    echo "$timestamp - Temperature is $temp" >> $logfile
-    echo "$timestamp - Disabling Dynamic Fan Control" >> $logfile
-    ipmitool -I lanplus -H $IDRACIP -U $IDRACUSER -P $IDRACPASSWORD raw 0x30 0x30 0x01 0x00
-    echo "$timestamp - Setting Static Fan Speed" >> $logfile
-    ipmitool -I lanplus -H $IDRACIP -U $IDRACUSER -P $IDRACPASSWORD raw 0x30 0x30 0x02 0xff $STATICSPEED
+if [[ $temp < 39 ]]
+	then
+		echo "$timestamp - Temperature is $temp. 10% Fan Speed" >> $logfile
+		ipmitool -I lanplus -H $IDRACIP -U $IDRACUSER -P $IDRACPASSWORD raw 0x30 0x30 0x02 0xff 0xA #10% Fan Speed
+fi
+
+if [[ $temp > 40 && $temp < 44 ]]
+	then
+		echo "$timestamp - Temperature is $temp. 12% Fan Speed" >> $logfile
+		ipmitool -I lanplus -H $IDRACIP -U $IDRACUSER -P $IDRACPASSWORD raw 0x30 0x30 0x02 0xff 0xC #12% Fan Speed
+fi
+
+if [[ $temp > 45 && $temp < 49 ]]
+	then
+		echo "$timestamp - Temperature is $temp. 15% Fan Speed" >> $logfile
+		ipmitool -I lanplus -H $IDRACIP -U $IDRACUSER -P $IDRACPASSWORD raw 0x30 0x30 0x02 0xff 0xF #15% Fan Speed
+fi
+
+if [[ $temp > 50 && $temp < 54 ]]
+	then
+		echo "$timestamp - Temperature is $temp. 17% Fan Speed" >> $logfile
+		ipmitool -I lanplus -H $IDRACIP -U $IDRACUSER -P $IDRACPASSWORD raw 0x30 0x30 0x02 0xff 0x11 #17% Fan Speed
+fi
+
+if [[ $temp > 55 ]]
+	then
+		echo "$timestamp - Temperature is $temp. 20% Fan Speed" >> $logfile
+		ipmitool -I lanplus -H $IDRACIP -U $IDRACUSER -P $IDRACPASSWORD raw 0x30 0x30 0x02 0xff 0x14 #20% Fan Speed
 fi
